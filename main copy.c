@@ -6,53 +6,218 @@
 // A linked list (LL) node to store a queue entry
 struct processNode
 {
-    int proccessNumber;    // 0 .. n
-    int arrivalTime;       // time of arrival
-    int originalBurstTime; // untouched value of original
-    int leftoverBurstTime; // will be used to subtract whenever work is done
-    int waitTime;          // total time spent waiting
-    int responseTime;      // response time
-    int turnAroundTime;    // turn around time
+    int proccessNumber;      // 0 .. n
+    float arrivalTime;       // time of arrival
+    float originalBurstTime; // untouched value of original
+    float leftoverBurstTime; // will be used to subtract whenever work is done
+    float waitTime;          // total time spent waiting
+    float responseTime;      // response time
+    float turnAroundTime;    // turn around time
+    float firstTime;
+    float exitTime;
     int inReady;
     struct processNode *next;
     struct processNode *prev;
 };
 
 typedef struct processNode *node;
+node head = NULL, rear = NULL, temp = NULL; // declaring head, rear and temp
+node readyQHead = NULL;
+node endHead = NULL;
+float currentTime = 0;
 
-// // node copyList(node head)
-// {
-//     if (head == NULL)
-//     {
-//         return NULL;
-//     }
-//     else
-//     {
-//         // Allocate the memory for new Node
-//         // in the heap and set its data
-//         node newNode = (node)malloc(sizeof(struct processNode));
+node addToReadyQ2(float currentTime)
+{
+    printf("\tadd to ready q \n");
+    node Pheadprev = NULL;
+    node Qheadprev = NULL;
 
-//         newNode->proccessNumber = head->proccessNumber;
-//         newNode->arrivalTime = head->arrivalTime;
-//         newNode->originalBurstTime = head->originalBurstTime;
-//         newNode->leftoverBurstTime = head->originalBurstTime;
-//         newNode->waitTime = head->waitTime;
-//         newNode->responseTime = head->responseTime;
-//         newNode->turnAroundTime = head->turnAroundTime;
-//         newNode->inReady = head->inReady;
+    node Phead = NULL;
+    node Qhead = NULL;
 
-//         // Recursively set the next pointer of
-//         // the new Node by recurring for the
-//         // remaining nodes
-//         newNode->next = copyList(head->next);
+    if (head != NULL)
+    {
+        Phead = head;
+    }
 
-//         return newNode;
-//     }
-// }
+    if (readyQHead != NULL)
+    {
+        Qhead = readyQHead;
+    }
+
+    // printf("current Time: %f", currentTime);
+    while (Phead != NULL)
+    {
+
+        printf("process number: %d   arrival time %f  burst time: %f, current:%p prev: %p next: %p ; \n", Phead->proccessNumber, Phead->arrivalTime, Phead->originalBurstTime, Phead, Phead->prev, Phead->next);
+
+        // put to Qhead
+        if (currentTime > Phead->arrivalTime || currentTime == Phead->arrivalTime)
+        {
+            printf("current time: > || == \n");
+
+            // add to queue
+            if (Qhead == NULL)
+            {
+                printf("Qhead == NULL \n"); // no previous node
+                if (Pheadprev == NULL)
+                {
+                    printf("pheadprev == NUL \n");
+                    // assign the link list to node.
+                    Qhead = Phead;
+
+                    // shift phead
+                    Phead = Phead->next; // go to next node
+                    Phead->prev = NULL;  // removing the 2node previous
+                    head = Phead;        // assigning the second node as the head now
+
+                    Qhead->next = NULL; // removing the previous head's next so it is single node
+                    readyQHead = Qhead;
+
+                    printf("Qhead process number: %d   arrival time %f  burst time: %f, current:%p prev: %p next: %p ; \n", Qhead->proccessNumber, Qhead->arrivalTime, Qhead->originalBurstTime, Qhead, Qhead->prev, Qhead->next);
+
+                    printf("Head process number: %d   arrival time %f  burst time: %f, current:%p prev: %p next: %p ; \n", head->proccessNumber, head->arrivalTime, head->originalBurstTime, head, head->prev, head->next);
+
+                    printf("next \n\n;");
+                    printf("PHead process number: %d   arrival time %f  burst time: %f, current:%p prev: %p next: %p ; \n", Phead->proccessNumber, Phead->arrivalTime, Phead->originalBurstTime, Phead, Phead->prev, Phead->next);
+
+                    // break;
+                }
+                // got previous node
+                else if (Pheadprev != NULL)
+                {
+                    printf("Pheadprev != Null \n");
+                    Pheadprev->next = Phead->next; // assign previous's node next to next next node
+
+                    while (Qhead->next != NULL) // move to the end
+                    {
+                        Qhead = Qhead->next;
+                    }
+                    Qheadprev = Qhead;
+                    Qhead->next = Phead; // assign the last node of Qhead to the node
+
+                    Qhead = Qhead->next; // shift to node that have been placed.
+                    Phead = Phead->next; // move the phead's next
+
+                    Phead->prev = NULL;
+                    Qhead->next = NULL; // clear the node's next
+                    Qhead->prev = Qheadprev;
+                    // break;
+                }
+            }
+            // temporary not working on it
+            else if (Qhead != NULL)
+            {
+                printf("Qhead != Nulll\n");
+
+                if (Pheadprev != NULL)
+                {
+                    printf("Pheadprev != NULL \n");
+                    printf("num: %d, arrival: %f, Burst:%f \n", Pheadprev->proccessNumber, Pheadprev->arrivalTime, Pheadprev->leftoverBurstTime);
+
+                    Pheadprev->next = Phead->next;
+
+                    while (Qhead->next != NULL) // move to the end
+                    {
+                        Qhead = Qhead->next;
+                    }
+                    Qheadprev = Qhead;
+                    Qhead->next = Phead;
+
+                    Qhead = Qhead->next;
+                    if (Phead->next != NULL)
+                    {
+                        // Pheadprev = Phead;
+                        Phead = Phead->next;
+                        Phead->prev = NULL;
+                    }
+                    else
+                    {
+                        // Pheadprev = Phead;
+                        Phead = Phead->next;
+                    }
+                    Qhead->next = NULL;
+                    Qhead->prev = Qheadprev;
+                }
+                // no previous node in the linked list
+                else if (Pheadprev == NULL)
+                {
+                    printf("Pheadprev == NULL\n");
+                    while (Qhead->next != NULL) // move to the end
+                    {
+                        Qhead = Qhead->next;
+                    }
+                    Qheadprev = Qhead;
+                    Qhead->next = Phead;
+
+                    Qhead = Qhead->next;
+                    if (Phead->next != NULL)
+                    {
+                        // Pheadprev = Phead;
+                        Phead = Phead->next;
+                        Phead->prev = NULL;
+                    }
+                    else
+                    {
+                        // Pheadprev = Phead;
+                        Phead = Phead->next;
+                    }
+
+                    Qhead->next = NULL;
+                    Qhead->prev = Qheadprev;
+                }
+                else
+                {
+                    printf("??");
+                    printf("moving ahead first \n");
+                    // Pheadprev = Phead;
+                    Phead = Phead->next;
+                }
+            }
+        }
+
+        // move forward
+        else if (currentTime < Phead->arrivalTime)
+        {
+            printf(" current node> CT \n");
+            Pheadprev = Phead;
+            Phead = Phead->next;
+        }
+    }
+
+    printf("end of first while loop\n");
+
+    node tempP = NULL;
+
+    tempP = Pheadprev;
+
+    if (tempP != NULL)
+    {
+        printf("tempP not null");
+        while (tempP->prev != NULL)
+        {
+            tempP = tempP->prev;
+        }
+        printf("tempP process number: %d   arrival time %f  burst time: %f, current:%p prev: %p next: %p ; \n", tempP->proccessNumber, tempP->arrivalTime, tempP->originalBurstTime, tempP, tempP->prev, tempP->next);
+        head = tempP;
+    }
+    else if (tempP == NULL)
+    {
+        printf("is NULL");
+        return readyQHead;
+    }
+    else
+    {
+        printf("need to return");
+        return readyQHead;
+    }
+
+    printf("return v2");
+    return readyQHead;
+}
 
 node rearNode(node head)
 {
-
     node temp, p;
     p = head;
 
@@ -75,10 +240,12 @@ node createNode(int num, int arrivalTime, int originalBurstTime)
     temp->originalBurstTime = originalBurstTime;
     temp->leftoverBurstTime = originalBurstTime;
 
+    temp->firstTime = -1;
     temp->waitTime = -1;
     temp->responseTime = -1;
     temp->turnAroundTime = -1;
     temp->inReady = -1; // may or may not need this
+    temp->exitTime = -1;
 
     temp->next = NULL; // make next point to NULL
     temp->prev = NULL; // make next point to NULL
@@ -92,21 +259,24 @@ node addNode(int num, int arrivalTime, int originalBurstTime, node head)
     // printf("\naddNode\n");
     node temp, p, prev = NULL;
     temp = createNode(num, arrivalTime, originalBurstTime); // use function to create new node
-    printf("\n\t check newly created node.  id: %d  arrival: %d  burst: %d \n\n", temp->proccessNumber, temp->arrivalTime, temp->originalBurstTime);
+    printf("\n\t check newly created node.  id: %d  arrival: %f  burst: %f \n\n", temp->proccessNumber, temp->arrivalTime, temp->originalBurstTime);
 
     // check if head is empty/
     if (head == NULL)
     {
         head = temp; // assign temp as head.
     }
+    // at least 2 nodes
     else
     {
-        printf("2 nodes only\n");
+        printf("At least 2 node exist\n");
         p = head; // asign head to p
 
         // if currently there is only 2 seperate nodes:
         if (p->next == NULL)
         {
+            printf("2 Nodes only");
+            // check the arrival time and assign accordingly
             if (p->arrivalTime > temp->arrivalTime)
             {
                 temp->next = p;
@@ -136,18 +306,20 @@ node addNode(int num, int arrivalTime, int originalBurstTime, node head)
                 }
             }
         }
+
+        // already have more than 2 nodes
         else
-        { // already have more than 2 nodes
+        {
+            printf("more than 2 nodes \n");
             printf("adding to linked list \n");
             printf("num: %d, arrival: %d, Burst:%d \n", num, arrivalTime, originalBurstTime);
-            int boo = 0;
 
-            while (p->next != NULL)
+            while (p != NULL)
             {
                 printf(" \n\n inside while loop\n");
                 // printf("current p. process id:%d arrival time: %d burstime: %d\n", p->proccessNumber, p->arrivalTime, p->originalBurstTime);
 
-                // new node is bigger than current node
+                // new node is bigger than current node, go to next node in linked list
                 if (temp->arrivalTime > p->arrivalTime)
                 {
                     printf("next");
@@ -155,134 +327,94 @@ node addNode(int num, int arrivalTime, int originalBurstTime, node head)
                     p = p->next; // traverse the list
                     // check to see if it is the end. if so, we just append
                 }
+
+                // new node is same as current node
                 else if (temp->arrivalTime == p->arrivalTime)
                 {
                     printf("arrival time are equal\n");
-                    printf("new node %d ", temp->leftoverBurstTime);
-                    printf("linked list node: %d \n", p->leftoverBurstTime);
+                    printf("new node's leftover burst time %f ", temp->leftoverBurstTime);          // compare the leftover burst time
+                    printf("linked list node's left over burst time: %f \n", p->leftoverBurstTime); // compare the leftover burst time
 
+                    // if bigger, go to next node.
                     if (temp->leftoverBurstTime > p->leftoverBurstTime)
                     {
-                        printf("go next\n");
-                        prev = p;
-                        p = p->next;
+                        printf("check if can go next\n");
+
+                        if (p->next == NULL)
+                        {
+                            printf("next is null, appending now");
+                            p->next = temp;
+                            temp->prev = p;
+                            p = p->next;
+                            break;
+                        }
+                        else
+                        {
+                            printf("next not null, append later");
+                            prev = p;
+                            p = p->next; // become null
+                        }
                     }
+                    // if smaller or the same, append
                     else
                     {
-                        printf("appending \n");
+                        printf("appending\n");
+                        // if there is a prevous node
                         if (prev != NULL)
-                        {                      // slightly more complicated.
+                        {
                             prev->next = temp; // previous node point to newly created node.
                             temp->prev = prev;
 
                             temp->next = p; // newly created node points to p
                             p->prev = temp;
-                            boo = 1;
                             break;
                         }
-                        else if (prev == NULL) // means that p is the first item
-                        {                      // simple & done.
-                            temp->next = p;    // assign new node to point to p.
+                        // if there is no previous node [could be the first node of linked list]
+                        else if (prev == NULL)
+                        {
+                            temp->next = p; // assign new node to point to p.
                             p->prev = temp;
 
-                            head = temp; // head is now temp.
-                            boo = 1;
+                            head = temp; //  Set the head to temp.
                             break;
                         }
                     }
                 }
-                else // current node is bigger than p of link list
+
+                // new node is smaller than curret node
+                else
                 {
-                    printf("else \n");
+                    printf("else: new node is smaller than current node \n");
 
                     if (prev != NULL)
-                    { // slightly more complicated.
-                        printf("prev is not null");
+                    {
+                        printf("prev is not null.. \n");
                         prev->next = temp; // previous node point to newly created node.
                         temp->prev = prev;
 
                         temp->next = p; // newly created node points to p
                         p->prev = temp;
-                        boo = 1;
+
+                        // printf("\t process number: %d   arrival time %d  burst time: %d, current:%p prev: %p next: %p ; \n\n", prev->proccessNumber, prev->arrivalTime, prev->originalBurstTime, prev, prev->prev, prev->next);
+
+                        // printf("\t process number: %d   arrival time %d  burst time: %d, current:%p prev: %p next: %p ; \n\n", temp->proccessNumber, temp->arrivalTime, temp->originalBurstTime, temp, temp->prev, temp->next);
+
+                        // printf("\t process number: %d   arrival time %d  burst time: %d, current:%p prev: %p next: %p ; \n\n", p->proccessNumber, p->arrivalTime, p->originalBurstTime, p, p->prev, p->next);
+
                         break;
                     }
 
                     else if (prev == NULL) // means that p is the first item
-                    {                      // simple & done.
-                        printf("prev is null \n");
-                        printf("num: %d, arrival: %d, Burst:%d \n", p->proccessNumber, p->arrivalTime, p->leftoverBurstTime);
+                    {
+                        printf("prev is null.. \n");
+                        printf("num: %d, arrival: %f, Burst:%f \n", p->proccessNumber, p->arrivalTime, p->leftoverBurstTime);
 
                         temp->next = p; // assign new node to point to p.
                         p->prev = temp;
 
                         head = temp; // head is now temp.
-                        boo = 1;
                         break;
                     }
-                }
-            }
-
-            // p is at the last node of the linked list.
-
-            // append at the end if it is not appended in any of the cases while looping
-            if (boo == 0)
-            {
-                printf("boo");
-                if (p->arrivalTime > temp->arrivalTime)
-                {
-                    prev->next = temp; // 2nd last element should point to new node
-                    temp->prev = prev;
-
-                    temp->next = p; // new node should point to p.
-                    p->prev = temp;
-
-                    p->next = NULL;
-                }
-                else if (temp->arrivalTime > p->arrivalTime)
-                {
-                    p->next = temp; // normal assigning to the last
-                    temp->prev = p;
-                }
-                // same arrival time.
-                else if (temp->arrivalTime == p->arrivalTime)
-                { // there should be a prev node
-                    printf("temp->arrivalTime == p->arrivalTime \n");
-                    if (temp->leftoverBurstTime > p->leftoverBurstTime)
-                    {
-                        printf("temp->leftoverBurstTime > p->leftoverBurstTime \n");
-                        p->next = temp;
-                        temp->prev = p;
-                    }
-                    else // the issue
-                    {
-                        printf("elsee issuess.. \n");
-                        if (prev->arrivalTime == temp->arrivalTime)
-                        {
-                            printf("if \n");
-                            if (temp->leftoverBurstTime > prev->leftoverBurstTime)
-                            {
-
-                                prev->next = temp;
-                                temp->prev = prev;
-                                temp->next = p;
-                                p->prev = temp;
-                            }
-                        }
-                        else if (prev->arrivalTime > temp->arrivalTime)
-                        {
-                            printf("else if \n");
-
-                            prev->next = temp;
-                            temp->prev = prev;
-                            temp->next = p;
-                            p->prev = temp;
-                        }
-                    }
-                }
-                else // both are equal
-                {
-                    p->next = temp; // normal assigning to the last
-                    temp->prev = p;
                 }
             }
         }
@@ -293,109 +425,55 @@ node addNode(int num, int arrivalTime, int originalBurstTime, node head)
 // print the linked list value
 void printLinkedlist(struct processNode *p)
 {
-    printf("\nprintLinkedList \n");
+    printf("printLinkedList \n");
 
     while (p != NULL)
     {
-        printf("\t process number: %d   arrival time %d  burst time %d prev: %p next: %p ; \n\n", p->proccessNumber, p->arrivalTime, p->originalBurstTime, p->prev, p->next);
+        printf("\t process number: %d   arrival time %f  burst time: %f, current:%p prev: %p next: %p ; \n", p->proccessNumber, p->arrivalTime, p->leftoverBurstTime, p, p->prev, p->next);
         // printf("test next %p", p->next);
         p = p->next;
     }
+    printf("end of printLinkedList\n");
+    return;
 }
 
-node addToReadyQ(node head, node readyQHead, int currentTime)
+int numOfNodes()
 {
-    printf("add to ready q \n\n");
+    printf("num of nodes");
     node Qhead = readyQHead;
-
-    node prevNode = NULL;
-    node nextNode = NULL;
-    node currNode = NULL;
-    currNode = head;
-
-    while (currNode->next != NULL)
+    int totalNodes = 0;
+    while (Qhead != NULL)
     {
-
-        printf("id: %d, arrival time: %d burst time: %d\n ", currNode->proccessNumber, currNode->arrivalTime, currNode->leftoverBurstTime);
-
-        // if current time is not big enough, continue on.
-        if (currNode->arrivalTime > currentTime)
-        {
-            printf("c1\n");
-            prevNode = currNode;
-            currNode = currNode->next; // go to next one
-        }
-        else if (currentTime > currNode->arrivalTime || currentTime == currNode->arrivalTime)
-        { // smaller than or equal to currentTime
-
-            if (Qhead == NULL) // if there is nothing in the readyqueue
-            {
-                printf("c2.1\n");
-                Qhead = currNode;   // assign the currentnode as head.
-                readyQHead = Qhead; // assign the currentnode as head.
-
-                if (prevNode != NULL)
-                {
-                    // remove the current node's existence as we moved to ready queue
-                    prevNode->next = currNode->next;
-                }
-            }
-            else
-            {
-                // if there is already item in the readqueue
-                printf("c2.2\n");
-                Qhead->next = currNode; // set the next to the current node
-                Qhead = Qhead->next;
-                if (prevNode != NULL)
-                {
-                    prevNode->next = currNode->next;
-                }
-            }
-            prevNode = currNode;
-            currNode = currNode->next;
-
-        } // end of else if
-    }     // end of while loop
-
-    // // check the last item in the linked list before leaving
-    if (currNode->arrivalTime == currentTime || currentTime > currNode->arrivalTime)
-    {
-        if (Qhead == NULL)
-        {
-            Qhead = currNode;
-            readyQHead = Qhead;
-            if (prevNode != NULL)
-            {
-                prevNode->next = currNode->next;
-            }
-        }
-        else if (Qhead != NULL)
-        {
-            printf("Qhead rocessNumber %d", Qhead->proccessNumber);
-            printf("Qhead rocessNumber %d", currNode->proccessNumber);
-            printf("qhead not null att he end");
-            Qhead->next = currNode; // set the next to the current node
-            if (prevNode != NULL)
-            {
-                prevNode->next = currNode->next;
-            }
-        }
+        totalNodes = totalNodes + 1;
+        Qhead = Qhead->next;
     }
 
-    return readyQHead;
+    return totalNodes;
+}
+
+int sumReadyQueueProcesses(node readyQHead)
+{
+    printf("sumReadyQueue Processes");
+    node Qhead = readyQHead;
+    int TotalBurstTime = 0;
+    while (Qhead != NULL)
+    {
+        TotalBurstTime = TotalBurstTime + Qhead->leftoverBurstTime;
+        Qhead = Qhead->next;
+    }
+    return TotalBurstTime;
 }
 
 int main()
 {
 
-    node head = NULL, rear = NULL, temp = NULL; // declaring head, rear and temp
     int numProcesses = 0;
 
     float TQ,          // time quantum
         Average_Burst; // average burst
     int numItems;      // number of items left in the readyQ
 
-    float Sum_processes_burts, currentTime = 0;
+    float currentTime = 0;
     float avgWaitTime = 0.0,
           avgTurnAroundTime = 0.0,
           avgResponseTime = 0.0;
@@ -416,264 +494,140 @@ int main()
 
         // pass in data into node creator
         head = addNode(i, arrivalTime, originalBurstTime, head);
+        printLinkedlist(head);
     }
     printLinkedlist(head);
-    rear = rearNode(head);
-    // printf("rear node check: processnum: %d, arrivalTime %d, bursttime %d \n", rear->proccessNumber, rear->arrivalTime, rear->leftoverBurstTime);
 
-    printf("the ready queue. Time 0\n");
-    node readyQHead = NULL; // using currentTime to put in nodes into this linkedlist
+    // printf("\n to be processed by the ready queue. Time Now: %f \n", currentTime);
 
-    readyQHead = addToReadyQ(head, readyQHead, currentTime);
-    printLinkedlist(readyQHead);
+    addToReadyQ2(currentTime); // adding process
+
+    while (head != NULL)
+    // while (readyQHead != NULL)
+    {
+
+        printf("\n\n\n\n\n\ncurrent time %f \n", currentTime);
+        addToReadyQ2(currentTime); // adding process
+
+        printf("head \n");
+        printLinkedlist(head);
+
+        printf("\n\n\n\nreadyQ\n");
+        printLinkedlist(readyQHead);
+
+        rear = rearNode(readyQHead);
+        rear->next = readyQHead;
+        readyQHead->prev = rear;
+
+        printf("now:");
+        float Sum_processes_burts = 0;
+        Sum_processes_burts = sumReadyQueueProcesses(readyQHead);
+        printf("sum processes_burst %f", Sum_processes_burts);
+        int totalNodes = 0;
+        totalNodes = numOfNodes();
+
+        Average_Burst = Sum_processes_burts / (float)totalNodes;
+        TQ = Average_Burst * 0.85;
+
+        printf("sum of process bursts: %f, num of nodes: %d, average Burst: %f, TQ: %f", Sum_processes_burts, totalNodes, Average_Burst, TQ);
+
+        node qhead = readyQHead;
+
+        while (qhead != NULL)
+        {
+
+            if (qhead->firstTime == -1)
+            {
+                printf("putting first time");
+                qhead->firstTime = currentTime;
+            }
+
+            // first subtract
+            if (qhead->leftoverBurstTime > TQ)
+            {
+                printf("qhead->leftoverBurstTime > TQ");
+                qhead->leftoverBurstTime = qhead->leftoverBurstTime - TQ;
+                currentTime = currentTime + TQ;
+                // Checking to subtract or not
+                if (TQ > qhead->leftoverBurstTime || TQ == qhead->leftoverBurstTime)
+                {
+                    currentTime = currentTime + qhead->leftoverBurstTime;
+
+                    qhead->leftoverBurstTime = qhead->leftoverBurstTime - qhead->leftoverBurstTime;
+
+                    qhead->exitTime = currentTime;
+                    // !! To check for new processes
+                    node endHeadDup = endHead;
+                    if (endHeadDup == NULL)
+                    {
+                        endHeadDup = qhead;
+                        qhead = qhead->next;
+                        qhead->prev = NULL;
+                        endHeadDup->next = NULL;
+                    }
+                    else if (endHeadDup != NULL)
+                    {
+                        while (endHeadDup->next != NULL)
+                        {
+                            endHeadDup = endHeadDup->next;
+                        }
+                        endHeadDup->next = qhead;
+                        qhead = qhead->next;
+                        qhead->prev = NULL;
+                        endHeadDup = endHeadDup->next;
+                        endHeadDup->next = NULL;
+                    }
+                    break;
+                }
+                else
+                {
+                    // go to next process;
+                    qhead = qhead->next;
+                }
+            }
+            else if (TQ > qhead->leftoverBurstTime || TQ == qhead->leftoverBurstTime)
+            {
+                printf("if TQ > = leftover");
+                currentTime = currentTime + qhead->leftoverBurstTime;
+                qhead->leftoverBurstTime = qhead->leftoverBurstTime - qhead->leftoverBurstTime;
+
+                qhead->exitTime = currentTime;
+
+                // !! To check for new processes
+                node endHeadDup = endHead;
+                if (endHeadDup == NULL)
+                {
+                    endHeadDup = qhead;
+                    qhead = qhead->next;
+                    qhead->prev = NULL;
+                    endHeadDup->next = NULL;
+                }
+                else if (endHeadDup != NULL)
+                {
+                    while (endHeadDup->next != NULL)
+                    {
+                        endHeadDup = endHeadDup->next;
+                    }
+                    endHeadDup->next = qhead;
+                    qhead = qhead->next;
+                    qhead->prev = NULL;
+                    endHeadDup = endHeadDup->next;
+                    endHeadDup->next = NULL;
+                }
+                break;
+            }
+        }
+
+        // currentTime = currentTime + 1;
+    }
+
+    // readyQHead = addToReadyQ2(currentTime); // adding process
+
+    printf("\n end");
 
     return 0;
 }
 
-// within main
-/*// check arrival time is in sequence
-printf("after sorting by arrival Time \n");
-for (int i = 0; i < numProcesses; i++)
-{
-    printf("proccess id %d arrival %d burst time %d \n", allProcess[i].proccessNumber, allProcess[i].arrivalTime, allProcess[i].leftoverBurstTime);
-}*/
-// check backup working fine
-/*for (int i = 0; i < sizeof(allProcessBackup); i++)
-{
-    printf("proccess id %d arrival %d burst time %d \n", allProcessBackup[i].proccessNumber, allProcessBackup[i].arrivalTime, allProcessBackup[i].leftoverBurstTime);
-}*/
-
-// ready Queue selector
-// numItems = readyQueueSelector(readyQueue, allProcess, numProcesses, currentTime);
-/* checking ready queue to make sure only things appears as it is
-for (int i = 0; i < numItems; i++)
-    printf("\n arrival timing %d \n", readyQueue[i].arrivalTime);
-*/
-
-// printf("items inside ready queue %d \n", numItems);
-//  sort ready queue by burst time
-// burstTimeSorter(readyQueue, numItems);
-/*    for (int i = 0; i < numItems; i++)
-        printf("arrival timing %d \n", readyQueue[i].arrivalTime);
-*/
-
-// temporary variable to hold onto the number of items
-/*int originalNumItems = numItems;
-
-while (originalNumItems == numItems)
-{
-
-    for (int i = 0; i < numItems; i++)
-    {
-        Sum_processes_burts = sumReadyQueueProcesses(readyQueue, numItems);
-        printf("sum of all process in ready queue %f \n", Sum_processes_burts);
-        Average_Burst = Sum_processes_burts / numItems;
-        printf("average burst of all process in ready queue %f \n", Average_Burst);
-        TQ = 0.85 * Average_Burst;
-        printf("TQ is %f \n", TQ);
-
-        //! Execute first process
-        readyQueue[i].leftoverBurstTime = readyQueue[i].leftoverBurstTime - TQ;
-        currentTime = currentTime + TQ;
-
-        if (readyQueue[i].responseTime == -1)
-        {
-            // response time = time at which process get cpu for the first time - arrival time
-            readyQueue[i].responseTime = (currentTime - TQ) - readyQueue[i].arrivalTime;
-        }
-
-        //! re-allocate the cpu to the current process for the remaining time
-        if (TQ >= readyQueue[i].leftoverBurstTime)
-        {
-            readyQueue[i].leftoverBurstTime = readyQueue[i].leftoverBurstTime - readyQueue[i].leftoverBurstTime;
-            currentTime = currentTime + readyQueue[i].leftoverBurstTime;
-            numItems = numItems - 1; // remove it
-            printf("to break out from process");
-
-            // !!NOTE: may have issues here !! potential problem
-            memcpy(&readyQueue[numItems], &readyQueue[i], sizeof(readyQueue[i]));
-            break; // break out
-        }
-        else
-        {
-            // send process to end of ready queue and recount
-        }
-    }
-} */
-
-/*    printf("end for now \n");
-
-    printf("check ready queue");
-    printf("process id %d", readyQueue[0].proccessNumber);
-    printf("burst left over %d", readyQueue[0].leftoverBurstTime);
-
-    printf("process id %d", readyQueue[1].proccessNumber);
-    printf("burst left over %d", readyQueue[1].leftoverBurstTime);
-
-    printf("process id %d", readyQueue[2].proccessNumber);
-    printf("burst left over %d", readyQueue[2].leftoverBurstTime);
-
-    printf("process id %d", readyQueue[3].proccessNumber);
-    printf("burst left over %d", readyQueue[3].leftoverBurstTime); */
-
-// Sum_processes_burts = sumProcesses(readyQueue, numProcesses);
-// printf("\nSum_Process_Bursts : %d \n", Sum_processes_burts);
-// Calcualte average burst
-// Average_Burst = Sum_processes_burts / numProcesses;
-// printf("Average_Burst: %d \n", Average_Burst);
-
-// calculate the TQ
-// TQ = 0.85 * Average_Burst;
-// printf("TQ: %d \n", TQ);
-
-// execute first process in the ready queue
-
-// calcualte the remaining time of current process
-
-// if remaining time less than TQ
-// do stuff
-// else:
-// send process to the end of ready queue .
-// end of main
-
-// not used for now
-
-/* if to implement a queue
-
-// The queue, front stores the front node of LL and rear stores the last node of LL
-struct Queue
-{
-    struct processNode *front, *rear;
-};
-// A utility function to create an empty queue
-struct Queue *createQueue()
-{
-    struct Queue *q = (struct Queue *)malloc(sizeof(struct Queue));
-    q->front = q->rear = NULL;
-    return q;
-}
-
-// The function to add a key k to q
-void enQueue(struct Queue *q, int k)
-{
-    // Create a new LL node
-    struct processNode *temp = newNode(k);
-
-    // If queue is empty, then new node is front and rear
-    // both
-    if (q->rear == NULL)
-    {
-        q->front = q->rear = temp;
-        return;
-    }
-
-    // Add the new node at the end of queue and change rear
-    q->rear->next = temp;
-    q->rear = temp;
-}
-
-// Function to remove a key from given queue q
-void deQueue(struct Queue *q)
-{
-    // If queue is empty, return NULL.
-    if (q->front == NULL)
-        return;
-
-    // Store previous front and move front one node ahead
-    struct processNode *temp = q->front;
-
-    q->front = q->front->next;
-
-    // If front becomes NULL, then change rear also as NULL
-    if (q->front == NULL)
-        q->rear = NULL;
-
-    free(temp);
-}*/
-
-/* to fix the swapping*/
-// void swap2(struct process *xp, struct process *yp)
-// {
-//     struct process temp = *xp;
-//     *xp = *yp;
-//     *yp = temp;
-// }
-
-/*
-// change the following 2 to linked list
-void arrivalTimeSorter(struct process process[], int n)
-{
-    int i, j, min_idx;
-    // One by one move boundary of unsorted subarray
-    for (i = 0; i < n - 1; i++)
-    {
-        // Find the minimum element in unsorted array
-        min_idx = i;
-        for (j = i + 1; j < n; j++)
-            if (process[j].arrivalTime < process[min_idx].arrivalTime)
-                min_idx = j;
-        // Swap the found minimum element
-        // with the first element
-        swap2(&process[min_idx], &process[i]);
-    }
-}
-
-void burstTimeSorter(struct process process[], int n)
-{
-    int i, j, min_idx;
-    // One by one move boundary of unsorted subarray
-    for (i = 0; i < n - 1; i++)
-    {
-        // Find the minimum element in unsorted array
-        min_idx = i;
-        for (j = i + 1; j < n; j++)
-            if (process[j].leftoverBurstTime < process[min_idx].leftoverBurstTime)
-                min_idx = j;
-        // Swap the found minimum element
-        // with the first element
-        swap2(&process[min_idx], &process[i]);
-    }
-}
-
-// select those processes that should go into ready queue
-int readyQueueSelector(
-    struct process readyQueue[], struct process allProcess[],
-    int numProcesses, float currentTime)
-{
-    // printf("\n\n ready Queue Selector");
-    int num = 0;
-    for (int i = 0; i < numProcesses; i++)
-    {
-
-        if (currentTime > allProcess[i].arrivalTime || allProcess[i].arrivalTime == currentTime)
-        {
-            readyQueue[num] = allProcess[i];
-            num++;
-        }
-        else
-        {
-        }
-    }
-    return num;
-}
-
-// sum of all the process
-int sumReadyQueueProcesses(struct process process[], int numProcesses)
-{
-    int total = 0;
-    for (int i = 0; i < numProcesses; i++)
-    {
-        total = total + process[i].leftoverBurstTime;
-    }
-    return total;
-}
-*/
-
-// references
-// structs
-// https://stackoverflow.com/questions/1693853/copying-arrays-of-structs-in-c
-// https://stackoverflow.com/questions/8206014/passing-an-array-of-structs-in-c
-// https://stackoverflow.com/questions/18914960/how-to-iterate-over-of-an-array-of-structures
-
-// to be used
-//  https://stackoverflow.com/questions/67727355/delete-item-in-array-of-struct-that-has-char-array-member-in-c
+// macos
+//  clang main.c -o main
+//  open main
