@@ -900,7 +900,7 @@ int main()
     printf("ready q head \n");
     printLinkedlist(readyQHead);
 
-    while (currentTime < 30)
+    while (currentTime < 16)
     // while (readyQHead != NULL)
     {
         if (currentTime != 0)
