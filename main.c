@@ -107,6 +107,10 @@ void printEndLinkedlist(struct processNode *p)
                 temp->turnAroundTime = temp->exitTime - temp->arrivalTime;
                 temp->waitTime = temp->turnAroundTime - temp->originalBurstTime;
 
+                avgWaitTime = temp->waitTime + avgWaitTime;
+                avgResponseTime = temp->responseTime + avgResponseTime;
+                avgTurnAroundTime = avgTurnAroundTime + temp->turnAroundTime;
+
                 printf(
                     "\t process number: %d   arrival time %f  burst time: %f, original burst: %f, waitTime:%f, responsetime:%f,turnAroundTime %f,firstime:%f, exittime:%f, current:%p next: %p \n ",
                     temp->proccessNumber, temp->arrivalTime, temp->leftoverBurstTime, temp->originalBurstTime, temp->waitTime, temp->responseTime, temp->turnAroundTime, temp->firstTime, temp->exitTime, temp, temp->next);
@@ -121,10 +125,19 @@ void printEndLinkedlist(struct processNode *p)
 
                 temp->turnAroundTime = temp->exitTime - temp->arrivalTime;
                 temp->waitTime = temp->turnAroundTime - temp->originalBurstTime;
+
+                avgWaitTime = temp->waitTime + avgWaitTime;
+                avgResponseTime = temp->responseTime + avgResponseTime;
+                avgTurnAroundTime = avgTurnAroundTime + temp->turnAroundTime;
+
                 printf(
                     "\t process number: %d   arrival time %f  burst time: %f, original burst: %f, waitTime:%f, responsetime:%f,turnAroundTime %f,firstime:%f, exittime:%f, current:%p next: %p \n",
                     temp->proccessNumber, temp->arrivalTime, temp->leftoverBurstTime, temp->originalBurstTime, temp->waitTime, temp->responseTime, temp->turnAroundTime, temp->firstTime, temp->exitTime, temp, temp->next);
             }
+
+            printf("AVG Wait time:%f ", avgWaitTime);
+            printf("AVG Response time:%f ", avgResponseTime);
+            printf("AVG Turnaround time:%f ", avgTurnAroundTime);
         }
         else
         {
@@ -887,7 +900,7 @@ int main()
     printf("ready q head \n");
     printLinkedlist(readyQHead);
 
-    while (currentTime < 15)
+    while (currentTime < 30)
     // while (readyQHead != NULL)
     {
         if (currentTime != 0)
