@@ -25,6 +25,7 @@ node readyQHead = NULL, rear = NULL; // queue head of linked list and rear
 node endHead = NULL;                 // last link list to store all the finished processes
 float currentTime = 0;               // the time passed since process started
 int numProcesses = 0;                // number of process inserted by user
+int loop = 0;                        // to be used as boolean to control looping
 
 // print the linked list value passed in the argument
 void printLinkedlist(struct processNode *p)
@@ -379,6 +380,7 @@ node rearNode(node head)
         p->next = p;
     }
 
+    printf("\t process number: %d   arrival time %f  burst time: %f, current:%p prev: %p next: %p ; \n", temp->proccessNumber, temp->arrivalTime, temp->leftoverBurstTime, temp, temp->prev, temp->next);
     return temp;
 }
 
@@ -767,7 +769,7 @@ int main()
         printf("ready q head \n");
         printLinkedlist(readyQHead);*/
 
-    while (currentTime < 34)
+    while (loop == 0)
     // while (readyQHead != NULL)
     {
         addToReadyQV2(currentTime); // adding process
@@ -776,7 +778,7 @@ int main()
         // if head is not null, check the rear accordingly and set it
         if (head != NULL)
         {
-            /* printf("before rear, check not null\n");*/
+            printf("before rear, check not null\n");
             node headRear = rearNode(head);
             if (headRear->prev != NULL)
             {
@@ -788,7 +790,7 @@ int main()
         if (readyQHead != NULL)
         {
 
-            /*printf("before rear, check not null2\n");
+            // /*printf("before rear, check not null2\n");
             printLinkedlist(readyQHead); // error appear here as queue is invalid*/
 
             rear = rearNode(readyQHead);
@@ -832,7 +834,7 @@ int main()
         }
         else if (readyQHead->next == readyQHead)
         {
-            /*printf("\n\n\n only 1 item\n");*/
+            printf("\n\n\n only 1 item\n");
 
             Sum_processes_burts = readyQHead->leftoverBurstTime;
             totalNodes = 1;
@@ -841,10 +843,14 @@ int main()
         }
         else
         {
-            printf("error");
         }
-
-        /*printf("sum of process bursts: %f, num of nodes: %d, average Burst: %f, TQ: %f\n", Sum_processes_burts, totalNodes, Average_Burst, TQ);*/
+        node nodeCounter = readyQHead;
+        int readyQlinkedlistNum = 0;
+        do
+        {
+            readyQlinkedlistNum = readyQlinkedlistNum + 1;
+            nodeCounter = nodeCounter->next;
+        } while (nodeCounter != readyQHead);
 
         // doing the time loop
         node qhead = readyQHead;
@@ -880,6 +886,7 @@ int main()
 
                     if (endHeadDup == NULL) // if there are no nodes in this end link list..
                     {
+                        printf("endhead not null");
                         node endHeadNewNode = (node)malloc(sizeof(struct processNode)); // allocate memory using malloc()
                         memcpy(endHeadNewNode, qhead, sizeof(struct processNode));
 
@@ -896,10 +903,6 @@ int main()
                         }
                         free(toRemoveNode);
                         qhead = currentNode->next;
-                        if (qhead == NULL)
-                        {
-                            readyQHead = qhead;
-                        }
 
                         endHeadNewNode->next = NULL;
                         endHeadNewNode->prev = NULL;
@@ -910,7 +913,7 @@ int main()
                     // there is already node in the linked list
                     else if (endHeadDup != NULL)
                     {
-                        /*   printf("endHeadDup != NULL \n");*/
+                        printf("endHeadDup != NULL \n");
 
                         while (endHeadDup->next != NULL)
                         {
@@ -932,6 +935,11 @@ int main()
 
                         free(toRemoveNode);
                         readyQHead = currentNode;
+
+                        if (readyQlinkedlistNum == 1)
+                        {
+                            readyQHead = NULL;
+                        }
 
                         endHeadDup->next = endHeadNewNode;
                         endHeadDup = endHeadDup->next;
@@ -982,20 +990,27 @@ int main()
                     }
                     currentNode->next = toRemoveNode->next;
                     free(toRemoveNode);
-                    qhead = currentNode->next;
+                    readyQHead = currentNode->next;
+                    if (readyQlinkedlistNum == 1)
+                    {
+                        readyQHead = NULL;
+                    }
 
                     endHeadDup = endHeadNewNode;
                     endHeadDup->next = NULL;
                     endHeadDup->prev = NULL;
+                    endHead = endHeadDup;
                 }
                 else if (endHeadDup != NULL)
                 {
                     printf("endheadup != NULLLLL \n");
                     while (endHeadDup->next != NULL)
                     {
-                        endHeadDup = endHeadDup->next;
+
                         printf("process number %d, current %p, next %p \n", endHeadDup->proccessNumber, endHeadDup, endHeadDup->next);
+                        endHeadDup = endHeadDup->next;
                     }
+                    printf("process number %d, current %p, next %p \n", endHeadDup->proccessNumber, endHeadDup, endHeadDup->next);
 
                     node endHeadNewNode = (node)malloc(sizeof(struct processNode)); // allocate memory using malloc()
                     memcpy(endHeadNewNode, qhead, sizeof(struct processNode));
@@ -1014,6 +1029,11 @@ int main()
                     free(toRemoveNode);
                     readyQHead = currentNode;
 
+                    if (readyQlinkedlistNum == 1)
+                    {
+                        readyQHead = NULL;
+                    }
+
                     endHeadDup->next = endHeadNewNode;
                     endHeadDup = endHeadDup->next;
                     endHeadDup->next = NULL;
@@ -1022,6 +1042,10 @@ int main()
             }
         }
 
+        if (readyQHead == NULL && head == NULL)
+        {
+            loop = 1;
+        }
         // currentTime = currentTime + 1;
     }
 
