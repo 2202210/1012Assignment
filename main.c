@@ -816,7 +816,7 @@ int main()
                     }
                     currentNode->next = toRemoveNode->next;
                     free(toRemoveNode);
-                    qhead = currentNode->next;
+                    readyQHead = currentNode->next;
 
                     // no more nodes in the ready queue, so set to null
                     if (readyQlinkedlistNum == 1)
@@ -826,6 +826,7 @@ int main()
                     endHeadDup = endHeadNewNode;
                     endHeadDup->next = NULL;
                     endHeadDup->prev = NULL;
+                    endHead = endHeadDup;
                 }
                 else if (endHeadDup != NULL)
                 {
