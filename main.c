@@ -15,7 +15,6 @@ struct processNode
     float turnAroundTime;    // turn around time
     float firstTime;         // first time that the process get cpu
     float exitTime;          // time at which the node is finished
-    int contextSwitch;
     struct processNode *next;
     struct processNode *prev;
 };
@@ -27,6 +26,7 @@ node endHead = NULL;                 // last link list to store all the finished
 float currentTime = 0;               // the time passed since process started
 int numProcesses = 0;                // number of process inserted by user
 int loop = 0;                        // to be used as boolean to control looping
+int contextSwitch = 0;
 
 // print the link list at the end of the process. Will return aveverage time of response, wait and turnaround time
 void printEndLinkedlist(struct processNode *p)
@@ -64,8 +64,8 @@ void printEndLinkedlist(struct processNode *p)
                 avgResponseTime = temp->responseTime + avgResponseTime;
                 avgTurnAroundTime = avgTurnAroundTime + temp->turnAroundTime;
 
-                printf("\t process number: %d   arrival time %f , original burst: %f, waitTime:%f, responsetime:%f,turnAroundTime %f,firstime:%f, exittime:%f\n ",
-                       temp->proccessNumber, temp->arrivalTime, temp->originalBurstTime, temp->waitTime, temp->responseTime, temp->turnAroundTime, temp->firstTime, temp->exitTime);
+                printf("\t process number: %d   arrival time %f , original burst: %f, waitTime:%f, responsetime:%f,turnAroundTime %f, exittime:%f\n ",
+                       temp->proccessNumber, temp->arrivalTime, temp->originalBurstTime, temp->waitTime, temp->responseTime, temp->turnAroundTime, temp->exitTime);
 
                 temp = temp->next;
             }
@@ -81,13 +81,14 @@ void printEndLinkedlist(struct processNode *p)
                 avgResponseTime = temp->responseTime + avgResponseTime;
                 avgTurnAroundTime = avgTurnAroundTime + temp->turnAroundTime;
 
-                printf("\t process number: %d   arrival time %f , original burst: %f, waitTime:%f, responsetime:%f,turnAroundTime %f,firstime:%f, exittime:%f\n ",
-                       temp->proccessNumber, temp->arrivalTime, temp->originalBurstTime, temp->waitTime, temp->responseTime, temp->turnAroundTime, temp->firstTime, temp->exitTime);
+                printf("\t process number: %d   arrival time %f , original burst: %f, waitTime:%f, responsetime:%f,turnAroundTime %f,exittime:%f\n ",
+                       temp->proccessNumber, temp->arrivalTime, temp->originalBurstTime, temp->waitTime, temp->responseTime, temp->turnAroundTime, temp->exitTime);
             }
 
             printf("\n\tAverage Wait time:%f ", avgWaitTime / numProcesses);
             printf("Average Response time:%f ", avgResponseTime / numProcesses);
-            printf("Average Turnaround time:%f\n", avgTurnAroundTime / numProcesses);
+            printf("Average Turnaround time:%f ", avgTurnAroundTime / numProcesses);
+            printf("Total Context Switch: %d \n", contextSwitch - 1);
         }
         else
         {
@@ -304,7 +305,6 @@ node createNode(int num, int arrivalTime, int originalBurstTime)
     temp->responseTime = -1;
     temp->turnAroundTime = -1;
     temp->exitTime = -1;
-    temp->contextSwitch = 0;
 
     temp->next = NULL; // make next point to NULL
     temp->prev = NULL; // make next point to NULL
@@ -560,7 +560,6 @@ void sortList(node readyQHeadToSort)
                     current->turnAroundTime = index->turnAroundTime;
                     current->firstTime = index->firstTime;
                     current->exitTime = index->exitTime;
-                    current->contextSwitch = index->contextSwitch;
 
                     // change accordingly based on the new node
                     index->proccessNumber = temp->proccessNumber;
@@ -572,7 +571,6 @@ void sortList(node readyQHeadToSort)
                     index->turnAroundTime = temp->turnAroundTime;
                     index->firstTime = temp->firstTime;
                     index->exitTime = temp->exitTime;
-                    index->contextSwitch = temp->contextSwitch;
                 }
                 index = index->next;
             }
@@ -614,7 +612,6 @@ int main()
     // the implementation of the algo.
     while (loop == 0)
     {
-        printf("looping \n");
         if (currentTime == 0)
         {
             node headRear = rearNode(head);
@@ -687,7 +684,6 @@ int main()
         node qhead = readyQHead;
         while (qhead != NULL)
         {
-            printf("qhead not null \n");
 
             // setting the time for the node accordingly if it is their first time
             if (qhead->firstTime == -1)
@@ -695,12 +691,12 @@ int main()
                 qhead->firstTime = currentTime;
             }
 
+            contextSwitch = contextSwitch + 1;
             // The first subtraction
             if (qhead->leftoverBurstTime > TQ)
             {
                 qhead->leftoverBurstTime = qhead->leftoverBurstTime - TQ;
                 currentTime = currentTime + TQ;
-                qhead->contextSwitch = qhead->contextSwitch + 1;
 
                 // The potential second subtraction: Checking to subtract or not
                 if (TQ > qhead->leftoverBurstTime || TQ == qhead->leftoverBurstTime)
@@ -792,7 +788,6 @@ int main()
 
                 currentTime = currentTime + qhead->leftoverBurstTime;
                 qhead->leftoverBurstTime = qhead->leftoverBurstTime - qhead->leftoverBurstTime;
-                qhead->contextSwitch = qhead->contextSwitch + 1;
 
                 qhead->exitTime = currentTime;
 
